@@ -20,7 +20,7 @@ class CustomRateLimitMiddleware:
         request_times = [timestamp for timestamp in request_times if timestamp > five_minute_ago]
         
         # Check whether the current request exceed the threshold(100 requests in 5 minutes)
-        if len(request_times)>100:
+        if len(request_times)>=100:
             return HttpResponse("Too many requests", status=429)
         
         # After checking the request whether its under 100, Add the current request time to the list
@@ -28,6 +28,12 @@ class CustomRateLimitMiddleware:
         # Save to the list back to cache, expires after 5 minutes.
         cache.set(ip, request_times, timeout=300)
         
+        
         response = self.get_response(request)
+        
+        # Adding custom headers to show the how many responses are left
+        remaining_requests = 100 - len(request_times)
+        response['X-RateLimit-Remaining'] = str(remaining_requests)
+        
         return response
         
