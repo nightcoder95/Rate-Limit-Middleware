@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.shortcuts import render
 from django.http import HttpResponse
 import time
 
@@ -20,8 +21,15 @@ class CustomRateLimitMiddleware:
         request_times = [timestamp for timestamp in request_times if timestamp > five_minute_ago]
         
         # Check whether the current request exceed the threshold(100 requests in 5 minutes)
-        if len(request_times)>=100:
-            return HttpResponse("Too many requests", status=429)
+        request_count = len(request_times)
+        remaining_requests = 100 - request_count
+        if request_count>=100:
+            context = {
+                'request_count': request_count,
+                'remaining_requests': remaining_requests
+            }
+            return render(request, 'too_many_requests.html', context, status=429)
+            return response
         
         # After checking the request whether its under 100, Add the current request time to the list
         request_times.append(current_time)
@@ -30,10 +38,14 @@ class CustomRateLimitMiddleware:
         
         
         response = self.get_response(request)
+        response.request_count = request_count +1
+        response.remaining_requests = remaining_requests -1
         
         # Adding custom headers to show the how many responses are left
         remaining_requests = 100 - len(request_times)
         response['X-RateLimit-Remaining'] = str(remaining_requests)
+        response['X-Rate-Limit-Limit'] = '100'
+        response['X-Rate-Limit-Window'] = '300'
         
         return response
         

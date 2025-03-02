@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <div class="bg-red-700 pt-10 text-2xl flex-col flex items-center  w-screen h-screen text-white">
+      <h1>Oops, Too Many Requests!</h1>
+      <p>You’ve hit the limit of 100 requests in 5 minutes.</p>
+      <p>Current Request Count: {{ request_count }}</p>
+      <p>Remaining Requests: {{ remaining_requests }}</p>
+      <p>Please wait a few minutes and try again.</p>
+    </div>
+  </body>
+</html>
